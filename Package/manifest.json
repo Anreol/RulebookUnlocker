@@ -1,0 +1,9 @@
+﻿{
+	"name": "RulebookUnlocker",
+	"version_number": "1.0.0",
+	"website_url": "",
+	"description": "Simple mod that lets you access the hidden Rulebook catalogs, can be configured!",
+	"dependencies": [
+		"bbepis-BepInExPack-5.4.9",
+	]
+}
