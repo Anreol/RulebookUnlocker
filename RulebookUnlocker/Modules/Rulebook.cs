@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine;
 
 namespace RuleBookEditor
 {
@@ -47,12 +46,8 @@ namespace RuleBookEditor
             {
                 //Me on my way to subscribe the most amount of events so this shit gets fixed
                 arg1.networkRuleBookComponent.onRuleBookUpdated += NetworkRuleBookComponent_onRuleBookUpdated;
-                ChangeRuleCatalogRuleCategoryDef();
+                ChangeRuleCatalogRuleCategoryDef(arg1.networkRuleBookComponent.ruleBook);
                 FixRules();
-            }
-            else
-            {
-                UndoRuleCatalogRuleCategoryDef();
             }
         }
 
@@ -65,30 +60,27 @@ namespace RuleBookEditor
         {
             if (RoR2.GameModeCatalog.FindGameModeIndex("ClassicRun") == arg1.gameModeIndex)
             {
-                ChangeRuleCatalogRuleCategoryDef();
+                ChangeRuleCatalogRuleCategoryDef(arg1.networkRuleBookComponent.ruleBook);
                 FixRules();
-            }
-            else
-            {
-                UndoRuleCatalogRuleCategoryDef();
             }
         }
 
-        private static void ChangeRuleCatalogRuleCategoryDef()
+        private static void ChangeRuleCatalogRuleCategoryDef(RoR2.RuleBook rulebook)
         {
-            foreach (var categoryDef in RoR2.RuleCatalog.allCategoryDefs)
+            foreach (var ruleChoiceDef in rulebook.choices)
             {
-                if (categoryDef.displayToken == "RULE_HEADER_ITEMS")
+                RoR2.RuleCategoryDef currentCategory = ruleChoiceDef.ruleDef.category;
+                if (currentCategory.displayToken == "RULE_HEADER_ITEMS")
                 {
-                    categoryDef.hiddenTest = new Func<bool>(ConfigItemCatalog);
+                    currentCategory.hiddenTest = new Func<bool>(ConfigItemCatalog);
                 }
-                if (categoryDef.displayToken == "RULE_HEADER_EQUIPMENT")
+                if (currentCategory.displayToken == "RULE_HEADER_EQUIPMENT")
                 {
-                    categoryDef.hiddenTest = new Func<bool>(ConfigEquipmentCatalog);
+                    currentCategory.hiddenTest = new Func<bool>(ConfigEquipmentCatalog);
                 }
-                if (categoryDef.displayToken == "RULE_HEADER_MISC")
+                if (currentCategory.displayToken == "RULE_HEADER_MISC")
                 {
-                    foreach (var ruleDef in categoryDef.children)
+                    foreach (var ruleDef in currentCategory.children)
                     {
                         switch (ruleDef.displayToken) //We could just don't care and enable everything, however, lets be specific in case a mod adds a new rule.
                         {
@@ -96,10 +88,10 @@ namespace RuleBookEditor
                                 {
                                     if (Config.unlockMiscMoneyRule.Value)
                                     {
-                                        foreach (var ruleChoiceDef in ruleDef.choices)
+                                        foreach (var subRuleChoiceDef in ruleDef.choices)
                                         {
-                                            ruleChoiceDef.spritePath = "Textures/MiscIcons/texRuleBonusStartingMoney"; //Fixes em not having icons
-                                            ruleChoiceDef.excludeByDefault = false;
+                                            subRuleChoiceDef.spritePath = "Textures/MiscIcons/texRuleBonusStartingMoney"; //Fixes em not having icons
+                                            subRuleChoiceDef.excludeByDefault = false;
                                         }
                                     }
                                     break;
@@ -108,10 +100,10 @@ namespace RuleBookEditor
                                 {
                                     if (Config.unlockMiscStageOrder.Value)
                                     {
-                                        foreach (var ruleChoiceDef in ruleDef.choices)
+                                        foreach (var subRuleChoiceDef in ruleDef.choices)
                                         {
-                                            ruleChoiceDef.spritePath = "Textures/MiscIcons/texRuleMapIsRandom"; //See above!
-                                            ruleChoiceDef.excludeByDefault = false;
+                                            subRuleChoiceDef.spritePath = "Textures/MiscIcons/texRuleMapIsRandom"; //See above!
+                                            subRuleChoiceDef.excludeByDefault = false;
                                         }
                                     }
                                     break;
@@ -120,9 +112,9 @@ namespace RuleBookEditor
                                 {
                                     if (Config.unlockMiscKeepMoneyBetweenStages.Value)
                                     {
-                                        foreach (var ruleChoiceDef in ruleDef.choices)
+                                        foreach (var subRuleChoiceDef in ruleDef.choices)
                                         {
-                                            ruleChoiceDef.excludeByDefault = false;
+                                            subRuleChoiceDef.excludeByDefault = false;
                                         }
                                     }
                                     break;
@@ -131,9 +123,9 @@ namespace RuleBookEditor
                                 {
                                     if (Config.unlockMiscAllowDropin.Value)
                                     {
-                                        foreach (var ruleChoiceDef in ruleDef.choices)
+                                        foreach (var subRuleChoiceDef in ruleDef.choices)
                                         {
-                                            ruleChoiceDef.excludeByDefault = false;
+                                            subRuleChoiceDef.excludeByDefault = false;
                                         }
                                     }
                                     break;
@@ -147,6 +139,7 @@ namespace RuleBookEditor
         }
 
         //We are changing the catalog directly so we gotta undo it
+        /* No Longer needed, we are changing a PreGameController instance's rulebook instead of the catalog...
         private static void UndoRuleCatalogRuleCategoryDef()
         {
             foreach (var categoryDef in RoR2.RuleCatalog.allCategoryDefs)
@@ -217,7 +210,7 @@ namespace RuleBookEditor
                     }
                 }
             }
-        }
+        }*/
 
         private static void FixRules() //Check RuleCategoryController's line 265, I think it's hilarious
         {

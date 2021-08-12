@@ -1,6 +1,6 @@
 ﻿{
 	"name": "RulebookUnlocker",
-	"version_number": "1.0.0",
+	"version_number": "1.0.1",
 	"website_url": "https://github.com/Anreol/RulebookUnlocker",
 	"description": "Simple mod that lets you access the hidden Rulebook catalogs, can be configured!",
 	"dependencies": [

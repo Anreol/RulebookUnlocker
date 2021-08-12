@@ -2,7 +2,7 @@
 
 Simple mod that will enable the hidden Item Catalog, Equipment Catalog, and Modifiers (The ones you can see in Prismatic Trials!).
 Automatically shows any items or equipment added by mods.
-Can be configurated to hide each category / invididual modifier.
+Can be configurated to hide each category / individual modifier.
 
 It will only show up in the default gamemode (ClassicRun), meaning no cheating is allowed in Eclipse.
 
@@ -12,5 +12,7 @@ Due to how the game handles rules with more than two choices, the money rule is 
 With enough items or equipment, the menu will start overflowing outside the screen, [https://thunderstore.io/package/KingEnderBrine/ScrollableLobbyUI/] will take care of this problem.
 ## Changelog
 
+**1.0.1**
+* Hotfix to fix the mod somehow not being networked.
 **1.0.0**
 * Initial Release
