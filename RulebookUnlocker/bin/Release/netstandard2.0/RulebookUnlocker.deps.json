@@ -17,7 +17,8 @@
           "MMHOOK_Assembly-CSharp": "0.0.0.0",
           "Mono.Cecil.Rocks": "0.10.4.0",
           "UnityEngine.CoreModule": "0.0.0.0",
-          "UnityEngine": "0.0.0.0"
+          "UnityEngine": "0.0.0.0",
+          "UnityEngine.Networking": "1.0.0.0"
         },
         "runtime": {
           "RulebookUnlocker.dll": {}
@@ -90,6 +91,14 @@
           "UnityEngine.dll": {
             "assemblyVersion": "0.0.0.0",
             "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "UnityEngine.Networking/1.0.0.0": {
+        "runtime": {
+          "UnityEngine.Networking.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
           }
         }
       },
@@ -639,6 +648,11 @@
       "sha512": ""
     },
     "UnityEngine/0.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "UnityEngine.Networking/1.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""

@@ -13,6 +13,6 @@ With enough items or equipment, the menu will start overflowing outside the scre
 ## Changelog
 
 **1.0.1**
-* Hotfix to fix the mod somehow not being networked.
+* Hotfix, now access the rulebook instance instead of the base one.
 **1.0.0**
 * Initial Release
