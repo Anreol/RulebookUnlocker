@@ -1,4 +1,5 @@
 ﻿using BepInEx;
+using System;
 using UnityEngine;
 
 namespace RuleBookEditor
@@ -10,7 +11,7 @@ namespace RuleBookEditor
 #if DEBUG
             "9999." +
 #endif
-            "1.0.1";
+            "1.0.3";
 
         internal const string ModIdentifier = "RuleBookUnlocker";
         internal const string ModGuid = "com.Anreol." + ModIdentifier;
@@ -26,22 +27,7 @@ namespace RuleBookEditor
             //Debug.LogWarning("Setting up localhost:7777");
             //On.RoR2.Networking.GameNetworkManager.OnClientConnect += (self, user, t) => { };
 #endif
-            Init();
-        }
-
-        public void Start()
-        {
-            InitLate();
-        }
-
-        private void Init()
-        {
             RuleBookEditor.Config.Initialize();
-        }
-
-        private void InitLate()
-        {
-            Rulebook.Initialize();
         }
     }
 }

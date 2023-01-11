@@ -24,30 +24,55 @@ namespace RuleBookEditor
             return true;
         }
 
+        [RoR2.SystemInitializer(new Type[]
+{
+            typeof(RoR2.RuleCatalog)
+})]
         public static void Initialize()
         {
-            RoR2.PreGameController.onPreGameControllerSetRuleBookGlobal += PreGameController_onPreGameControllerSetRuleBookGlobal;
-            RoR2.PreGameController.onPreGameControllerSetRuleBookServerGlobal += PreGameController_onPreGameControllerSetRuleBookServerGlobal;
-            RoR2.PreGameRuleVoteController.onVotesUpdated += PreGameRuleVoteController_onVotesUpdated;
+            RoR2.PreGameController.onPreGameControllerSetRuleBookGlobal += RuleBookGlobal;
+            RoR2.PreGameController.onPreGameControllerSetRuleBookServerGlobal += ServerRuleBook;
+            RoR2.PreGameController.onServerRecalculatedModifierAvailability += onServerRecalculatedAvailabiltiy;
+            RoR2.PreGameRuleVoteController.onVotesUpdated += OnVotesUpdated;
         }
 
-        private static void PreGameRuleVoteController_onVotesUpdated()
+        private static bool allowRuleChanging(RoR2.PreGameController preGameController = null)
         {
-            if (RoR2.GameModeCatalog.FindGameModeIndex("ClassicRun") == RoR2.PreGameController.instance.gameModeIndex)
+            if (preGameController == null)
+            {
+                if (RoR2.PreGameController.instance == null)
+                {
+                    return false;
+                }
+                preGameController = RoR2.PreGameController.instance;
+            }
+            return (RoR2.GameModeCatalog.FindGameModeIndex("ClassicRun") == preGameController.gameModeIndex) || (RoR2.GameModeCatalog.FindGameModeIndex("InfiniteTowerRun") == preGameController.gameModeIndex);
+        }
+
+        private static void onServerRecalculatedAvailabiltiy(RoR2.PreGameController obj)
+        {
+            FixRules();
+        }
+
+        private static void OnVotesUpdated()
+        {
+            if (allowRuleChanging())
             {
                 FixRules();
             }
         }
 
-        private static void PreGameController_onPreGameControllerSetRuleBookServerGlobal(RoR2.PreGameController arg1, RoR2.RuleBook arg2)
+        private static void ServerRuleBook(RoR2.PreGameController arg1, RoR2.RuleBook arg2)
         {
-            //RoR2.PreGameController.GameModeConVar.instance.GetString() == "ClassicRun"
-            if (RoR2.GameModeCatalog.FindGameModeIndex("ClassicRun") == arg1.gameModeIndex)
+            if (allowRuleChanging(arg1))
             {
-                //Me on my way to subscribe the most amount of events so this shit gets fixed
                 arg1.networkRuleBookComponent.onRuleBookUpdated += NetworkRuleBookComponent_onRuleBookUpdated;
-                ChangeRuleCatalogRuleCategoryDef(arg1.networkRuleBookComponent.ruleBook);
+                ExposeRulebookCategoryDefs(arg1.networkRuleBookComponent.ruleBook);
                 FixRules();
+            }
+            else
+            {
+                UndoRulebookCategoryDefExposure(arg1.networkRuleBookComponent.ruleBook);
             }
         }
 
@@ -56,30 +81,38 @@ namespace RuleBookEditor
             FixRules();
         }
 
-        private static void PreGameController_onPreGameControllerSetRuleBookGlobal(RoR2.PreGameController arg1, RoR2.RuleBook arg2)
+        private static void RuleBookGlobal(RoR2.PreGameController arg1, RoR2.RuleBook arg2)
         {
-            if (RoR2.GameModeCatalog.FindGameModeIndex("ClassicRun") == arg1.gameModeIndex)
+            if (allowRuleChanging(arg1))
             {
-                ChangeRuleCatalogRuleCategoryDef(arg1.networkRuleBookComponent.ruleBook);
+                ExposeRulebookCategoryDefs(arg1.networkRuleBookComponent.ruleBook);
                 FixRules();
+            }
+            else
+            {
+                UndoRulebookCategoryDefExposure(arg1.networkRuleBookComponent.ruleBook);
             }
         }
 
-        private static void ChangeRuleCatalogRuleCategoryDef(RoR2.RuleBook rulebook)
+        private static void ExposeRulebookCategoryDefs(RoR2.RuleBook rulebook)
         {
             foreach (var ruleChoiceDef in rulebook.choices)
             {
+                //Debug.LogWarning("ruleChoiceDef: " + ruleChoiceDef + " in " + rulebook.choices + " from " + rulebook);
                 RoR2.RuleCategoryDef currentCategory = ruleChoiceDef.ruleDef.category;
                 if (currentCategory.displayToken == "RULE_HEADER_ITEMS")
                 {
+                    //Debug.LogWarning("changed RULE_HEADER_ITEMS");
                     currentCategory.hiddenTest = new Func<bool>(ConfigItemCatalog);
                 }
                 if (currentCategory.displayToken == "RULE_HEADER_EQUIPMENT")
                 {
+                    //Debug.LogWarning("changed RULE_HEADER_EQUIPMENT");
                     currentCategory.hiddenTest = new Func<bool>(ConfigEquipmentCatalog);
                 }
                 if (currentCategory.displayToken == "RULE_HEADER_MISC")
                 {
+                    //Debug.LogWarning("changing RULE_HEADER_MISC");
                     foreach (var ruleDef in currentCategory.children)
                     {
                         switch (ruleDef.displayToken) //We could just don't care and enable everything, however, lets be specific in case a mod adds a new rule.
@@ -138,23 +171,22 @@ namespace RuleBookEditor
             }
         }
 
-        //We are changing the catalog directly so we gotta undo it
-        /* No Longer needed, we are changing a PreGameController instance's rulebook instead of the catalog...
-        private static void UndoRuleCatalogRuleCategoryDef()
+        private static void UndoRulebookCategoryDefExposure(RoR2.RuleBook rulebook)
         {
-            foreach (var categoryDef in RoR2.RuleCatalog.allCategoryDefs)
+            foreach (var ruleChoice in rulebook.choices)
             {
-                if (categoryDef.displayToken == "RULE_HEADER_ITEMS")
+                RoR2.RuleCategoryDef currentCategory = ruleChoice.ruleDef.category;
+                if (currentCategory.displayToken == "RULE_HEADER_ITEMS")
                 {
-                    categoryDef.hiddenTest = new Func<bool>(RoR2.RuleCatalog.HiddenTestItemsConvar);
+                    currentCategory.hiddenTest = new Func<bool>(RoR2.RuleCatalog.HiddenTestItemsConvar);
                 }
-                if (categoryDef.displayToken == "RULE_HEADER_EQUIPMENT")
+                if (currentCategory.displayToken == "RULE_HEADER_EQUIPMENT")
                 {
-                    categoryDef.hiddenTest = new Func<bool>(RoR2.RuleCatalog.HiddenTestItemsConvar);
+                    currentCategory.hiddenTest = new Func<bool>(RoR2.RuleCatalog.HiddenTestItemsConvar);
                 }
-                if (categoryDef.displayToken == "RULE_HEADER_MISC")
+                if (currentCategory.displayToken == "RULE_HEADER_MISC")
                 {
-                    foreach (var ruleDef in categoryDef.children)
+                    foreach (var ruleDef in currentCategory.children)
                     {
                         switch (ruleDef.displayToken) //We could just don't care and enable everything, however, lets be specific in case a mod adds a new rule.
                         {
@@ -164,7 +196,6 @@ namespace RuleBookEditor
                                     {
                                         foreach (var ruleChoiceDef in ruleDef.choices)
                                         {
-                                            ruleChoiceDef.spritePath = "Textures/MiscIcons/texRuleBonusStartingMoney"; //Fixes em not having icons
                                             ruleChoiceDef.excludeByDefault = true;
                                         }
                                     }
@@ -176,7 +207,6 @@ namespace RuleBookEditor
                                     {
                                         foreach (var ruleChoiceDef in ruleDef.choices)
                                         {
-                                            ruleChoiceDef.spritePath = "Textures/MiscIcons/texRuleMapIsRandom"; //See above!
                                             ruleChoiceDef.excludeByDefault = true;
                                         }
                                     }
@@ -210,7 +240,7 @@ namespace RuleBookEditor
                     }
                 }
             }
-        }*/
+        }
 
         private static void FixRules() //Check RuleCategoryController's line 265, I think it's hilarious
         {
