@@ -1,5 +1,7 @@
 ﻿using System;
 
+//IMPORTANT TODO:
+//Fix ANY RULES with more than 2 options into a new category which is a strip vote
 namespace RuleBookEditor
 {
     internal class Rulebook
