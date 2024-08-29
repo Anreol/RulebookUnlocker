@@ -11,7 +11,7 @@ namespace RuleBookEditor
 #if DEBUG
             "9999." +
 #endif
-            "1.0.3";
+            "1.0.4";
 
         internal const string ModIdentifier = "RuleBookUnlocker";
         internal const string ModGuid = "com.Anreol." + ModIdentifier;

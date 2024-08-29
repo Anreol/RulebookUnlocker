@@ -17,6 +17,9 @@ With enough items or equipment, the menu will start overflowing outside the scre
 You can contact me by messaging to Anreol#8231
 
 ## Changelog
+**1.0.3.1**
+* Recompiled for ver. 1.3.1#274
+
 **1.0.3**
 * Fixed Simulacrum not getting the rulebook unlocked from the get-go (Had to go into a singleplayer run first)
 * Any gamemode other than ClassicRun and InfiniteTowerRun now resets the modified rules back to the expected defaults.
